@@ -1,0 +1,57 @@
+body {
+    font-family: Arial, sans-serif;
+    background: url('Murder Mystery background.jpg') center center/cover no-repeat fixed, linear-gradient(135deg, #232526 0%, #414345 100%);
+    color: #eee;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+}
+body::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    background: url('https://i.imgur.com/1Q9Z1Zm.png') repeat;
+    opacity: 0.12;
+    z-index: 0;
+}
+#game-container {
+    max-width: 500px;
+    margin: 40px auto;
+    background: rgba(30, 30, 30, 0.96);
+    padding: 24px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px #000b, 0 0 0 4px #a00a inset;
+    position: relative;
+    z-index: 1;
+    border: 2px solid #a00a;
+}
+#game-log {
+    min-height: 100px;
+    margin-bottom: 20px;
+    background: #222;
+    padding: 12px;
+    border-radius: 6px;
+    box-shadow: 0 0 4px #0004;
+    border-left: 6px solid #a00a;
+}
+select, button, input {
+    font-size: 1em;
+    margin: 6px 0;
+    padding: 4px 8px;
+    border-radius: 4px;
+    border: none;
+}
+button {
+    background: #a00a;
+    color: #fff;
+    cursor: pointer;
+    font-weight: bold;
+    letter-spacing: 1px;
+    box-shadow: 0 2px 8px #0006;
+}
+button:hover {
+    background: #d11c1c;
+}
