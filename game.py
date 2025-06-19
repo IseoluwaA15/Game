@@ -48,6 +48,7 @@ class MurderMysteryGame:
         print("3. Review evidence")
         print("4. Make an accusation")
         print("5. Quit game")
+        print("6. Interview all suspects")
             
     def handle_choice(self, choice):
         """Handle player's menu choice"""
@@ -62,6 +63,8 @@ class MurderMysteryGame:
         elif choice == "5":
             self.state.game_over = True
             print("\nThanks for playing!")
+        elif choice == "6":
+            self.interview_all_suspects()
         else:
             print("\nInvalid choice. Please try again.")
             
@@ -162,6 +165,13 @@ class MurderMysteryGame:
                 print("\nInvalid choice(s).")
         except ValueError:
             print("\nPlease enter valid numbers.")
+            
+    def interview_all_suspects(self):
+        """Interview all alive suspects (except the victim)"""
+        print("\n=== Interviewing All Suspects ===")
+        alive_characters = [c for c in self.characters if c.is_alive]
+        for character in alive_characters:
+            print(f"\n{character.name}: {character.get_statement(self.murderer, self.murder_location, self.murder_weapon)}")
 
 if __name__ == "__main__":
     game = MurderMysteryGame()

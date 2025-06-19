@@ -35,6 +35,12 @@ def generate_characters():
         Character("Colonel Mustard", "Retired Military Officer", "Strict and disciplined"),
         Character("Mrs. Peacock", "Socialite", "Elegant and observant"),
         Character("Mr. Green", "Businessman", "Ambitious and resourceful"),
-        Character("Dr. Black", "Wealthy Host", "Secretive and sophisticated")
+        Character("Dr. Black", "Wealthy Host", "Secretive and sophisticated"),
+        Character("Ms. Greenwood", "Botanist", "Calm and insightful"),
+        Character("Mr. Adams", "Detective", "Curious and analytical"),
+        Character("Dr. Springfield", "Physician", "Caring and precise"),
+        Character("Madam Rosemary", "Fortune Teller", "Mysterious and wise"),
+        Character("Sir Alexander", "Historian", "Knowledgeable and reserved"),
+        Character("Ms. Alagor", "Artist", "Creative and eccentric")
     ]
     return characters

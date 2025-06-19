@@ -3,12 +3,14 @@ const gameLog = document.getElementById('game-log');
 const gameActions = document.getElementById('game-actions');
 
 const characters = [
+    'Professor Plum',
+    'Miss Scarlet',
+    'Colonel Mustard',
+    'Mrs. Peacock',
+    'Mr. Green',
     'Ms. Greenwood',
-    'Mr. Adams',
     'Dr. Springfield',
-    'Madam Rosemary',
-    'Sir Alexander',
-    'Ms. Alagor'
+    'Sir Alexander'
 ];
 const locations = ['Kitchen', 'Ballroom', 'Conservatory', 'Dining Room', 'Billiard Room', 'Library', 'Lounge', 'Hall'];
 const weapons = ['Candlestick', 'Dagger', 'Lead Pipe', 'Revolver', 'Rope', 'Wrench'];
