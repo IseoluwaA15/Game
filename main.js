@@ -13,23 +13,32 @@ const characters = [
     'Sir Alexander'
 ];
 const locations = ['Kitchen', 'Ballroom', 'Conservatory', 'Dining Room', 'Billiard Room', 'Library', 'Lounge', 'Hall'];
-const weapons = ['Candlestick', 'Dagger', 'Lead Pipe', 'Revolver', 'Rope', 'Wrench'];
+const weapons = ['Candlestick', 'Knife', 'Lead Pipe', 'Revolver', 'Rope', 'Wrench'];
+const evidence = [
+    'Candlestick',
+    'Rope',
+    'Lead Pipe',
+    'Revolver',
+    'Knife',
+    'Wrench',
+    'Broken Glass',
+    'Muddy Footprints',
+    'Torn Fabric',
+    'Strange Letter'
+];
 
-let murderers = [];
-function pickMurderers() {
+let murderer = null;
+function pickMurderer() {
     let suspects = [...characters];
-    // Pick two unique murderers
-    const first = suspects.splice(Math.floor(Math.random() * suspects.length), 1)[0];
-    const second = suspects.splice(Math.floor(Math.random() * suspects.length), 1)[0];
-    murderers = [first, second];
+    murderer = suspects.splice(Math.floor(Math.random() * suspects.length), 1)[0];
 }
 
-// Pick murderers at the start
-pickMurderers();
+// Pick murderer at the start
+pickMurderer();
 
-// Update solution to use two murderers
+// Update solution to use one murderer
 let solution = {
-    murderers: murderers,
+    murderer: murderer,
     location: locations[Math.floor(Math.random() * locations.length)],
     weapon: weapons[Math.floor(Math.random() * weapons.length)]
 };
@@ -42,8 +51,8 @@ function showActions() {
     gameActions.innerHTML = `
         <h3>Make an Accusation</h3>
         <form id="accuse-form">
-            <label>Suspects (hold Ctrl or Cmd to select two):
-                <select name="suspect" multiple size="${characters.length}">
+            <label>Suspect:
+                <select name="suspect" size="${characters.length}">
                     ${characters.map(c => `<option value="${c}">${c}</option>`).join('')}
                 </select>
             </label><br>
@@ -52,9 +61,9 @@ function showActions() {
                     ${locations.map(l => `<option value="${l}">${l}</option>`).join('')}
                 </select>
             </label><br>
-            <label>Weapon:
+            <label>Weapon or Evidence:
                 <select name="weapon">
-                    ${weapons.map(w => `<option value="${w}">${w}</option>`).join('')}
+                    ${evidence.map(w => `<option value="${w}">${w}</option>`).join('')}
                 </select>
             </label><br>
             <button type="submit">Accuse!</button>
@@ -66,25 +75,22 @@ function showActions() {
     document.getElementById('accuse-form').onsubmit = function(e) {
         e.preventDefault();
         const data = new FormData(e.target);
-        const suspects = Array.from(e.target.elements['suspect'].selectedOptions).map(opt => opt.value).join(',');
-        checkAccusation(suspects, data.get('location'), data.get('weapon'));
+        const suspect = data.get('suspect');
+        checkAccusation(suspect, data.get('location'), data.get('weapon'));
     };
 }
 
 function checkAccusation(suspect, location, weapon) {
-    // Accept if either murderer is accused, but only if both are selected
-    const accused = suspect.split(',').map(s => s.trim());
     if (
-        accused.length === 2 &&
-        accused.includes(solution.murderers[0]) &&
-        accused.includes(solution.murderers[1]) &&
+        suspect === solution.murderer &&
         location === solution.location &&
         weapon === solution.weapon
     ) {
-        log(`<b>Congratulations! You solved the mystery!</b> The murderers were ${solution.murderers.join(' and ')} in the ${location} with the ${weapon}.`);
+        log(`<b>Congratulations! You solved the mystery!</b> The murderer was ${solution.murderer} in the ${location} with the ${weapon}.`);
         gameActions.innerHTML = '<button onclick="window.location.reload()">Play Again</button>';
     } else {
         log(`Nope! That is not the correct solution. Try again!`);
+        pickHintGivers(); // Pick new hint givers for the next round
     }
 }
 
@@ -92,7 +98,7 @@ function showSummary() {
     const summary = `
         <h2>Case Summary</h2>
         <p><b>Victims:</b> Dr. Black, Mr. Adams, Madam Rosemary, and Ms. Alagor were found murdered!</p>
-        <p><b>Note:</b> Evidence suggests that two of the murderers worked together.</p>
+        <p><b>Note:</b> Evidence suggests that the murderer acted alone.</p>
         <p><b>Suspects:</b> ${characters.join(', ')}</p>
         <p><b>Locations:</b> ${locations.join(', ')}</p>
         <p><b>Possible Weapons (Evidence):</b> ${weapons.join(', ')}</p>
@@ -104,9 +110,23 @@ function showSummary() {
 }
 
 function startGame() {
+    pickHintGivers(); // Pick new hint givers for each round
     gameLog.innerHTML = 'Welcome to the Murder Mystery Game! Make your accusation below.';
     showActions();
 }
+
+// Pick two hint-givers (not the murderer) at the start of each round
+let hintGivers = [];
+function pickHintGivers() {
+    const nonMurderers = characters.filter(c => c !== murderer);
+    // Shuffle and pick two
+    for (let i = nonMurderers.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [nonMurderers[i], nonMurderers[j]] = [nonMurderers[j], nonMurderers[i]];
+    }
+    hintGivers = nonMurderers.slice(0, 2);
+}
+pickHintGivers();
 
 function showInterviewSection() {
     let html = '<h3>Interview a Suspect</h3>';
@@ -119,13 +139,23 @@ function showInterviewSection() {
 }
 
 function interviewSuspect(suspect) {
-    // Simple random responses for demo; you can expand with real clues
+    // Two suspects give an obvious hint about the murderer
+    if (hintGivers.includes(suspect)) {
+        log(`<b>Interview with ${suspect}:</b> I've noticed something odd about ${murderer}. They seemed nervous and avoided eye contact all evening. I have a strong feeling that ${murderer} is not as innocent as they seem.`);
+        return;
+    }
+    // The murderer denies everything
+    if (suspect === murderer) {
+        log(`<b>Interview with ${suspect}:</b> I don't know anything about what happened. I was nowhere near the scene when it occurred. People are always so quick to point fingers without any real evidence.`);
+        return;
+    }
+    // Generic but more detailed responses for others
     const responses = [
-        `"I didn't do it! I was in the ${locations[Math.floor(Math.random()*locations.length)]}."`,
-        `"Why are you asking me? Maybe check the ${weapons[Math.floor(Math.random()*weapons.length)]}."`,
-        `"I saw someone near the ${locations[Math.floor(Math.random()*locations.length)]}."`,
-        `"I heard a noise in the ${locations[Math.floor(Math.random()*locations.length)]}."`,
-        `"I have nothing to hide!"`
+        `"I didn't do it! I was in the ${locations[Math.floor(Math.random()*locations.length)]} reading quietly. I didn't hear or see anything unusual."`,
+        `"Why are you asking me? Maybe check the ${weapons[Math.floor(Math.random()*weapons.length)]}. I saw someone near it earlier, but I couldn't see who."`,
+        `"I saw someone near the ${locations[Math.floor(Math.random()*locations.length)]}, but it was too dark to make out their face. There was a strange noise, though."`,
+        `"I heard a noise in the ${locations[Math.floor(Math.random()*locations.length)]}. It sounded like something heavy falling, but when I checked, no one was there."`,
+        `"I have nothing to hide! I was with several people most of the night. If you ask around, they'll confirm it."`
     ];
     log(`<b>Interview with ${suspect}:</b> ${responses[Math.floor(Math.random()*responses.length)]}`);
 }
@@ -133,8 +163,8 @@ function interviewSuspect(suspect) {
 function showEvidenceSection() {
     let html = '<h3>Review Evidence</h3>';
     html += '<ul style="list-style:none;padding:0;">';
-    weapons.forEach((w, i) => {
-        html += `<li><button onclick="reviewEvidence('${w}')">Examine ${w}</button></li>`;
+    evidence.forEach((item, i) => {
+        html += `<li><button onclick="reviewEvidence('${item}')">Examine ${item}</button></li>`;
     });
     html += '</ul>';
     gameActions.innerHTML = html + '<button onclick="showActions()">Back to Accusation</button>';
@@ -163,17 +193,7 @@ function showLocationSection() {
 }
 
 function examineLocation(location) {
-    // More detailed clues for each location
-    const missingItems = [
-        'a valuable painting',
-        'a candlestick',
-        'a set of keys',
-        'a glass',
-        'a book',
-        'a vase',
-        'a clock',
-        'a letter'
-    ];
+    // Only show signs of struggle for each location
     const struggleAreas = [
         'near the window',
         'by the fireplace',
@@ -184,17 +204,38 @@ function examineLocation(location) {
         'in the corner',
         'by the door'
     ];
-    const clues = [
-        `You notice signs of a struggle in the ${location}, especially ${struggleAreas[Math.floor(Math.random()*struggleAreas.length)]}.`,
-        `Something seems to be missing from the ${location}: ${missingItems[Math.floor(Math.random()*missingItems.length)]}.`,
-        `There are muddy footprints in the ${location}, mostly ${struggleAreas[Math.floor(Math.random()*struggleAreas.length)]}.`,
-        `A broken object lies on the floor in the ${location}, close to ${struggleAreas[Math.floor(Math.random()*struggleAreas.length)]}.`,
-        `The ${location} appears undisturbed.`
-    ];
-    // Always show both missing item and struggle area for more detail
-    const item = missingItems[Math.floor(Math.random()*missingItems.length)];
+    // Special clues for the murder location (clearer, lead to the murderer)
+    let specialClue = '';
+    if (location === solution.location) {
+        // Find the murderer's initials, occupation, and gender for clues
+        const murdererName = solution.murderer;
+        const murdererInitials = murdererName.split(' ').map(n => n[0]).join('');
+        const murdererDetails = {
+            'Professor Plum': { occupation: 'professor', gender: 'male' },
+            'Miss Scarlet': { occupation: 'actress', gender: 'female' },
+            'Colonel Mustard': { occupation: 'military officer', gender: 'male' },
+            'Mrs. Peacock': { occupation: 'socialite', gender: 'female' },
+            'Mr. Green': { occupation: 'businessman', gender: 'male' },
+            'Ms. Greenwood': { occupation: 'botanist', gender: 'female' },
+            'Dr. Springfield': { occupation: 'physician', gender: 'male' },
+            'Sir Alexander': { occupation: 'historian', gender: 'male' }
+        };
+        const details = murdererDetails[murdererName] || { occupation: 'guest', gender: 'unknown' };
+        const indirectClues = [
+            `You find a monogrammed handkerchief with the initials <b>${murdererInitials}</b>.`,
+            `There are traces of a rare cologne or perfume often worn by a <b>${details.occupation}</b>.`,
+            `A button from an expensive suit or dress, similar to what a <b>${details.occupation}</b> would wear, is found near the scene.`,
+            `You notice a footprint that matches the size and style of shoes worn by someone who is <b>${details.gender}</b>.`,
+            `A faint scent of tobacco or a lipstick stain is found on a glass nearby, reminiscent of a <b>${details.gender}</b> guest.`,
+            `There are signs that someone left in a hurry, knocking over a chair and leaving behind a personal item belonging to a <b>${details.gender}</b> <b>${details.occupation}</b>.`,
+            `A note with a cryptic message is found, hinting at a secret related to a <b>${details.gender}</b> <b>${details.occupation}</b>.`,
+            `You find a torn piece of fabric that matches the clothing style of a <b>${details.gender}</b> <b>${details.occupation}</b>.`,
+            `There are muddy footprints leading away from the scene, matching the shoes of a <b>${details.gender}</b> guest.`
+        ];
+        specialClue = `<br><b>Special Clue:</b> ${indirectClues[Math.floor(Math.random()*indirectClues.length)]}`;
+    }
     const area = struggleAreas[Math.floor(Math.random()*struggleAreas.length)];
-    log(`<b>Location: ${location}</b><br>Missing item: <i>${item}</i>.<br>Signs of struggle: <i>${area}</i>.`);
+    log(`<b>Location: ${location}</b><br>Signs of struggle: <i>${area}</i>.${specialClue}`);
 }
 
 // Show summary on load

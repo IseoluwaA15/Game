@@ -1,6 +1,6 @@
 body {
     font-family: Arial, sans-serif;
-    background: url('Murder Mystery background.jpg') center center/cover no-repeat fixed, linear-gradient(135deg, #232526 0%, #414345 100%);
+    background: linear-gradient(135deg, #232526 0%, #414345 100%);
     color: #eee;
     margin: 0;
     padding: 0;
@@ -10,12 +10,13 @@ body {
 }
 body::before {
     content: '';
-    position: absolute;
+    position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
     pointer-events: none;
-    background: url('https://i.imgur.com/1Q9Z1Zm.png') repeat;
-    opacity: 0.12;
     z-index: 0;
+    background: url('Murder Mystery background.jpg') center center/cover no-repeat;
+    background-attachment: fixed;
+    opacity: 1;
 }
 #game-container {
     max-width: 500px;
