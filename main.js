@@ -52,7 +52,7 @@ function showActions() {
         <h3>Make an Accusation</h3>
         <form id="accuse-form">
             <label>Suspect:
-                <select name="suspect" size="${characters.length}">
+                <select name="suspect">
                     ${characters.map(c => `<option value="${c}">${c}</option>`).join('')}
                 </select>
             </label><br>
@@ -160,7 +160,16 @@ function interviewSuspect(suspect) {
     log(`<b>Interview with ${suspect}:</b> ${responses[Math.floor(Math.random()*responses.length)]}`);
 }
 
+let usedEvidence = null;
+
+function pickUsedEvidence() {
+    // Randomly pick one evidence to show signs of use for this round
+    usedEvidence = evidence[Math.floor(Math.random() * evidence.length)];
+}
+
 function showEvidenceSection() {
+    // Pick new used evidence for each round
+    pickUsedEvidence();
     let html = '<h3>Review Evidence</h3>';
     html += '<ul style="list-style:none;padding:0;">';
     evidence.forEach((item, i) => {
@@ -171,14 +180,43 @@ function showEvidenceSection() {
 }
 
 function reviewEvidence(weapon) {
-    // Simple random clues for demo; you can expand with real clues
-    const clues = [
-        `You find fingerprints on the ${weapon}.`,
-        `The ${weapon} appears recently cleaned.`,
-        `There are traces of blood on the ${weapon}.`,
-        `The ${weapon} is missing from its usual place.`,
-        `No obvious signs of use on the ${weapon}.`
-    ];
+    // Add clues that can tie to the murderer or show non-use
+    const murdererName = solution.murderer;
+    const murdererInitials = murdererName.split(' ').map(n => n[0]).join('');
+    const murdererDetails = {
+        'Professor Plum': { occupation: 'professor', gender: 'male' },
+        'Miss Scarlet': { occupation: 'actress', gender: 'female' },
+        'Colonel Mustard': { occupation: 'military officer', gender: 'male' },
+        'Mrs. Peacock': { occupation: 'socialite', gender: 'female' },
+        'Mr. Green': { occupation: 'businessman', gender: 'male' },
+        'Ms. Greenwood': { occupation: 'botanist', gender: 'female' },
+        'Dr. Springfield': { occupation: 'physician', gender: 'male' },
+        'Sir Alexander': { occupation: 'historian', gender: 'male' }
+    };
+    const details = murdererDetails[murdererName] || { occupation: 'guest', gender: 'unknown' };
+    let clues = [];
+    if (weapon === usedEvidence) {
+        // Only this evidence shows signs of use and can tie to the murderer
+        clues = [
+            `You find fingerprints on the ${weapon}.`,
+            `There are traces of blood on the ${weapon}.`,
+            `A monogrammed item with the initials <b>${murdererInitials}</b> is found near the ${weapon}.`,
+            `There are traces of a rare cologne or perfume often worn by a <b>${details.occupation}</b> on the ${weapon}.`,
+            `A button or fabric matching the clothing of a <b>${details.gender}</b> <b>${details.occupation}</b> is snagged on the ${weapon}.`,
+            `A partial fingerprint matching a <b>${details.gender}</b> guest is found on the ${weapon}.`,
+            `A note referencing the ${weapon} is found, hinting at a secret involving a <b>${details.gender}</b> <b>${details.occupation}</b>.`,
+            `The ${weapon} has a unique mark that matches something owned by ${murdererName}.`,
+            `A witness recalls seeing a <b>${details.gender}</b> <b>${details.occupation}</b> near the ${weapon} shortly before the crime.`
+        ];
+    } else {
+        // All other evidence shows no signs of use
+        clues = [
+            `The ${weapon} appears recently cleaned.`,
+            `No obvious signs of use on the ${weapon}.`,
+            `The ${weapon} is untouched and shows no signs of recent use.`,
+            `The ${weapon} is missing from its usual place.`
+        ];
+    }
     log(`<b>Evidence: ${weapon}</b> — ${clues[Math.floor(Math.random()*clues.length)]}`);
 }
 
